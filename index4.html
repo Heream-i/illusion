@@ -211,7 +211,8 @@
         <section class="comments-section">
 		            <h3 class="comments-title">Discussion</h3>
             
-            <!-- 1. Your existing Giscus script (with input-position set to top) -->
+            <!-- The Giscus Container Wrapper -->
+<div class="giscus-wrapper">
 <script src="https://giscus.app/client.js"
 		data-repo="heream-i/illusion"
         data-repo-id="R_kgDOUY4IPg"		
@@ -227,37 +228,38 @@
         crossorigin="anonymous"
         async>
 </script>
+</div>
 
-<!-- 2. THE SEPARATE LIMITER LOGIC -->
+<!-- Safe, Non-Blocking Character Restrictor -->
 <script>
-  (function() {
+  // Ensure the page is ready before setting up the monitor
+  window.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('message', (event) => {
-      // 1. Only read messages coming straight from giscus
+      // 1. Drop out if the message isn't coming from the secure giscus origin
       if (event.origin !== 'https://giscus.app') return;
       if (!event.data || !event.data.giscus) return;
 
-      // 2. Locate the active iframe on your page
+      // 2. Safely look for the frame inside the document
       const iframe = document.querySelector('iframe.giscus-frame');
-      if (!iframe) return;
+      if (!iframe || !iframe.contentWindow) return;
 
-      // 3. Track text content sent via the open metadata channel
+      // 3. Monitor the composer text state natively broadcast by giscus
       const text = event.data.giscus.discussion?.composer?.text;
       
       if (text && text.length > 1000) {
         alert("Comments are strictly limited to 1000 characters.");
         
-        // Truncate text cleanly down to the cap
-        const truncated = text.substring(0, 1000);
+        // Truncate to the 1000-character boundary
+        const allowedText = text.substring(0, 1000);
         
-        // Push the corrected value back down into the form field
+        // Inject the enforced string back across the iframe frame-boundary
         iframe.contentWindow.postMessage({
-          giscus: { setComposerText: truncated }
+          giscus: { setComposerText: allowedText }
         }, 'https://giscus.app');
       }
     });
-  })();
+  });
 </script>
-
         </section>
 
         <footer>
