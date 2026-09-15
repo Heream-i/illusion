@@ -210,54 +210,56 @@
         <!-- REAL FUNCTIONAL COMMENTS SECTION VIA GISCUS -->
         <section class="comments-section">
 		            <h3 class="comments-title">Discussion</h3>
-            
- <!-- 1. Unique target container to ensure no CSS/JS theme collision -->
-<div id="giscus-comments-container"></div>
+  <!-- 1. The native container Giscus looks for -->
+<div class="giscus"></div>
 
-<!-- 2. Cleaned Giscus Loader -->
+<!-- 2. The standard, robust HTML injection script -->
+<script src="https://giscus.app"
+        data-repo="heream-i/illusion"
+        data-repo-id="R_kgDOUY4IPg" 
+        data-category="General"
+        data-category-id="DIC_kwDOUY4IPs4DFl2K" 
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="1" 
+        data-input-position="top" 
+        data-theme="light"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+
+<!-- 3. Non-blocking character limiter script -->
 <script>
   (function() {
-    // Dynamically build the script to prevent framework theme collisions
-    const script = document.createElement('script');
-    script.src = "https://giscus.app";
-    script.setAttribute('data-repo', "heream-i/illusion");
-    script.setAttribute('data-repo-id', "R_kgDOUY4IPg"); // Keep your working ID here
-    script.setAttribute('data-category', "General");
-    script.setAttribute('data-category-id', "DIC_kwDOUY4IPs4DFl2K"); // Keep your working ID here
-    script.setAttribute('data-mapping', "pathname");
-    script.setAttribute('data-strict', "0");
-    script.setAttribute('data-reactions-enabled', "1");
-    script.setAttribute('data-emit-metadata', "1"); 
-    script.setAttribute('data-input-position', "top"); 
-    script.setAttribute('data-theme', "light"); // Explicitly forces the theme layout
-    script.setAttribute('data-lang', "en");
-    script.crossOrigin = "anonymous";
-    script.async = true;
-    
-    // Inject it cleanly into our custom container
-    document.getElementById('giscus-comments-container').appendChild(script);
-  })();
+    window.addEventListener('message', (event) => {
+      // Security check: Only process messages coming directly from Giscus
+      if (event.origin !== 'https://giscus.app') return;
+      if (!event.data || !event.data.giscus) return;
 
-  // 3. Safe character limiter logic triggered when user types
-  window.addEventListener('message', (event) => {
-    if (event.origin !== 'https://giscus.app') return;
-    if (!event.data || !event.data.giscus) return;
+      // Find the loaded iframe on the page
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (!iframe || !iframe.contentWindow) return;
 
-    const iframe = document.querySelector('iframe.giscus-frame');
-    if (!iframe || !iframe.contentWindow) return;
-
-    const text = event.data.giscus.discussion?.composer?.text;
-    
-    if (text && text.length > 1000) {
-      alert("Comments are strictly limited to 1000 characters.");
-      const allowedText = text.substring(0, 1000);
+      // Listen to the text being typed
+      const text = event.data.giscus.discussion?.composer?.text;
       
-      iframe.contentWindow.postMessage({
-        giscus: { setComposerText: allowedText }
-      }, 'https://giscus.app');
-    }
-  });
+      if (text && text.length > 1000) {
+        alert("Comments are strictly limited to 1000 characters.");
+        
+        // Truncate the text back down to 1000 characters
+        const allowedText = text.substring(0, 1000);
+        
+        // Push the truncated text back into the Giscus comment box
+        iframe.contentWindow.postMessage({
+          giscus: { setComposerText: allowedText }
+        }, 'https://giscus.app');
+      }
+    });
+  })();
 </script>
+
 
 
         </section>
