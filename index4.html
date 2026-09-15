@@ -228,36 +228,34 @@
         async>
 </script>
 
-<!-- 2. The script that automatically forces the 1000 character limit -->
+<!-- 2. THE SEPARATE LIMITER LOGIC -->
 <script>
-  window.addEventListener('message', (event) => {
-    // Safety check: Only listen to messages from the official giscus iframe
-    if (event.origin !== 'https://giscus.app') return;
-    if (!event.data || event.data.giscus?.loading) return;
+  (function() {
+    window.addEventListener('message', (event) => {
+      // 1. Only read messages coming straight from giscus
+      if (event.origin !== 'https://giscus.app') return;
+      if (!event.data || !event.data.giscus) return;
 
-    // Find the giscus iframe element on your page
-    const iframe = document.querySelector('iframe.giscus-frame');
-    if (!iframe) return;
+      // 2. Locate the active iframe on your page
+      const iframe = document.querySelector('iframe.giscus-frame');
+      if (!iframe) return;
 
-    // Check if the user is typing and read the text data
-    if (event.data.giscus?.discussion?.composer?.text) {
-      let currentText = event.data.giscus.discussion.composer.text;
+      // 3. Track text content sent via the open metadata channel
+      const text = event.data.giscus.discussion?.composer?.text;
       
-      // If they go over 1000 characters, truncate it
-      if (currentText.length > 1000) {
+      if (text && text.length > 1000) {
         alert("Comments are strictly limited to 1000 characters.");
         
-        const truncatedText = currentText.substring(0, 1000);
+        // Truncate text cleanly down to the cap
+        const truncated = text.substring(0, 1000);
         
-        // Send a command back into the iframe to overwrite their text to 1000 characters
+        // Push the corrected value back down into the form field
         iframe.contentWindow.postMessage({
-          giscus: {
-            setComposerText: truncatedText
-          }
+          giscus: { setComposerText: truncated }
         }, 'https://giscus.app');
       }
-    }
-  });
+    });
+  })();
 </script>
 
         </section>
