@@ -211,8 +211,10 @@
         <section class="comments-section">
 		            <h3 class="comments-title">Discussion</h3>
             
-            <!-- The Giscus Container Wrapper -->
-<div class="giscus-wrapper">
+            <!-- 1. The visual target container where Giscus will mount -->
+<div class="giscus"></div>
+
+<!-- 2. The standard, unmodified Giscus Launcher -->
 <script src="https://giscus.app/client.js"
 		data-repo="heream-i/illusion"
         data-repo-id="R_kgDOUY4IPg"		
@@ -228,38 +230,35 @@
         crossorigin="anonymous"
         async>
 </script>
-</div>
 
-<!-- Safe, Non-Blocking Character Restrictor -->
+<!-- 3. Safe Character Validation Listener -->
 <script>
-  // Ensure the page is ready before setting up the monitor
-  window.addEventListener('DOMContentLoaded', () => {
-    window.addEventListener('message', (event) => {
-      // 1. Drop out if the message isn't coming from the secure giscus origin
-      if (event.origin !== 'https://giscus.app') return;
-      if (!event.data || !event.data.giscus) return;
+  window.addEventListener('message', (event) => {
+    // Only accept messages from Giscus
+    if (event.origin !== 'https://giscus.app') return;
+    if (!event.data || !event.data.giscus) return;
 
-      // 2. Safely look for the frame inside the document
-      const iframe = document.querySelector('iframe.giscus-frame');
-      if (!iframe || !iframe.contentWindow) return;
+    // Grab the generated iframe safely from the DOM
+    const iframe = document.querySelector('iframe.giscus-frame');
+    if (!iframe || !iframe.contentWindow) return;
 
-      // 3. Monitor the composer text state natively broadcast by giscus
-      const text = event.data.giscus.discussion?.composer?.text;
+    // Pull the text state safely from the event payload
+    const text = event.data.giscus.discussion?.composer?.text;
+    
+    if (text && text.length > 1000) {
+      alert("Comments are strictly limited to 1000 characters.");
       
-      if (text && text.length > 1000) {
-        alert("Comments are strictly limited to 1000 characters.");
-        
-        // Truncate to the 1000-character boundary
-        const allowedText = text.substring(0, 1000);
-        
-        // Inject the enforced string back across the iframe frame-boundary
-        iframe.contentWindow.postMessage({
-          giscus: { setComposerText: allowedText }
-        }, 'https://giscus.app');
-      }
-    });
+      // Cut off the excess text
+      const allowedText = text.substring(0, 1000);
+      
+      // Update the input area inside the iframe directly
+      iframe.contentWindow.postMessage({
+        giscus: { setComposerText: allowedText }
+      }, 'https://giscus.app');
+    }
   });
 </script>
+
         </section>
 
         <footer>
