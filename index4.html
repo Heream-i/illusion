@@ -210,15 +210,23 @@
         <!-- REAL FUNCTIONAL COMMENTS SECTION VIA GISCUS -->
         <section class="comments-section">
 		            <h3 class="comments-title">Discussion</h3>
-					<!-- 1. The dedicated placeholder for your comments -->
+					
+					<!-- 1. The custom theme style injector -->
+<style>
+  /* Lock the comment input box height so walls of text can't be typed easily */
+  iframe.giscus-frame {
+    max-height: 450px !important;
+  }
+</style>
+
+<!-- 2. The dedicated placeholder for your comments -->
 <div id="my-isolated-giscus"></div>
 
-<!-- 2. Combined Loader & Strict Character Limiter -->
+<!-- 3. Combined Loader & Counter Alert Script -->
 <script>
   (function() {
     const giscusScript = document.createElement("script");
-    // MUST BE client.js to load giscus properly
-    giscusScript.src = "https://giscus.app/client.js"; 
+    giscusScript.src = "https://giscus.app/client.js";
     giscusScript.setAttribute("data-repo", "heream-i/illusion");
     giscusScript.setAttribute("data-repo-id", "R_kgDOUY4IPg"); // Keep your working ID here
     giscusScript.setAttribute("data-category", "General");
@@ -226,7 +234,7 @@
     giscusScript.setAttribute("data-mapping", "pathname");
     giscusScript.setAttribute("data-strict", "0");
     giscusScript.setAttribute("data-reactions-enabled", "1");
-    giscusScript.setAttribute("data-emit-metadata", "1"); 
+    giscusScript.setAttribute("data-emit-metadata", "1"); // REQUIRED: opens communication link
     giscusScript.setAttribute("data-input-position", "top"); 
     giscusScript.setAttribute("data-theme", "light"); 
     giscusScript.setAttribute("data-lang", "en");
@@ -235,36 +243,23 @@
 
     document.getElementById("my-isolated-giscus").appendChild(giscusScript);
 
-    // 3. New Strategy: Watch the page layout and inject a hard maxLength limit
-    const observer = new MutationObserver(() => {
-      const iframe = document.querySelector('iframe.giscus-frame');
-      if (iframe) {
-        // Stop watching once we find the iframe
-        observer.disconnect();
-
-        // Attach an input tracker directly to the window messaging line
-        window.addEventListener('message', (event) => {
-          if (event.origin !== 'https://giscus.app') return;
-          
-          const text = event.data.giscus?.discussion?.composer?.text;
-          if (text && text.length > 1000) {
-            alert("Comments are strictly limited to 1000 characters.");
-            
-            const allowedText = text.substring(0, 1000);
-            if (iframe.contentWindow) {
-              iframe.contentWindow.postMessage({
-                giscus: { setComposerText: allowedText }
-              }, 'https://giscus.app');
-            }
-          }
-        });
+    // 4. Watch for character changes broadcasted by the comment engine
+    let alertFired = false;
+    window.addEventListener('message', (event) => {
+      if (event.origin !== 'https://giscus.app') return;
+      
+      const text = event.data.giscus?.discussion?.composer?.text;
+      
+      if (text && text.length > 1000) {
+        // Only show the pop-up warning alert once per typing session so it isn't annoying
+        if (!alertFired) {
+          alert("⚠️ Warning: Your comment is " + text.length + " characters long. Comments on this site are requested to be under 1000 characters. Content past 1000 characters may be subject to moderation.");
+          alertFired = true;
+        }
+      } else {
+        // Reset the alert window trigger if they delete text back down under 1000 characters
+        alertFired = false;
       }
-    });
-
-    // Start watching the wrapper for the iframe to appear
-    observer.observe(document.getElementById("my-isolated-giscus"), { 
-      childList: true, 
-      subtree: true 
     });
   })();
 </script>
