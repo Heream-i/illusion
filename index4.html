@@ -210,56 +210,66 @@
         <!-- REAL FUNCTIONAL COMMENTS SECTION VIA GISCUS -->
         <section class="comments-section">
 		            <h3 class="comments-title">Discussion</h3>
-					
-				<!-- 1. The dedicated placeholder for your comments -->
+					<!-- 1. The dedicated placeholder for your comments -->
 <div id="my-isolated-giscus"></div>
 
-<!-- 2. Combined Loader & Character Limiter -->
+<!-- 2. Combined Loader & Strict Character Limiter -->
 <script>
   (function() {
-    // Force build the script to prevent site scripts from turning the theme to "undefined"
     const giscusScript = document.createElement("script");
-    giscusScript.src = "https://giscus.app/client.js";
+    // MUST BE client.js to load giscus properly
+    giscusScript.src = "https://giscus.app/client.js"; 
     giscusScript.setAttribute("data-repo", "heream-i/illusion");
-    giscusScript.setAttribute("data-repo-id", "R_kgDOUY4IPg"); // Keep your working code here
+    giscusScript.setAttribute("data-repo-id", "R_kgDOUY4IPg"); // Keep your working ID here
     giscusScript.setAttribute("data-category", "General");
-    giscusScript.setAttribute("data-category-id", "DIC_kwDOUY4IPs4DFl2K"); // Keep your working code here
+    giscusScript.setAttribute("data-category-id", "DIC_kwDOUY4IPs4DFl2K"); // Keep your working ID here
     giscusScript.setAttribute("data-mapping", "pathname");
     giscusScript.setAttribute("data-strict", "0");
     giscusScript.setAttribute("data-reactions-enabled", "1");
-    giscusScript.setAttribute("data-emit-metadata", "1"); // Keeps text channel open
-    giscusScript.setAttribute("data-input-position", "top"); // Moves box to the top
-    giscusScript.setAttribute("data-theme", "light"); // HARD FORCES light theme layout
+    giscusScript.setAttribute("data-emit-metadata", "1"); 
+    giscusScript.setAttribute("data-input-position", "top"); 
+    giscusScript.setAttribute("data-theme", "light"); 
     giscusScript.setAttribute("data-lang", "en");
     giscusScript.crossOrigin = "anonymous";
     giscusScript.async = true;
 
-    // Inject into our custom named div
     document.getElementById("my-isolated-giscus").appendChild(giscusScript);
 
-    // 3. Monitor text inside the iframe for the 1000-character cap
-    window.addEventListener('message', (event) => {
-      if (event.origin !== 'https://giscus.app') return;
-      if (!event.data || !event.data.giscus) return;
-
+    // 3. New Strategy: Watch the page layout and inject a hard maxLength limit
+    const observer = new MutationObserver(() => {
       const iframe = document.querySelector('iframe.giscus-frame');
-      if (!iframe || !iframe.contentWindow) return;
+      if (iframe) {
+        // Stop watching once we find the iframe
+        observer.disconnect();
 
-      const text = event.data.giscus.discussion?.composer?.text;
-      
-      if (text && text.length > 1000) {
-        alert("Comments are strictly limited to 1000 characters.");
-        
-        const allowedText = text.substring(0, 1000);
-        
-        // Overwrite text back down to the 1000-character count marker
-        iframe.contentWindow.postMessage({
-          giscus: { setComposerText: allowedText }
-        }, 'https://giscus.app');
+        // Attach an input tracker directly to the window messaging line
+        window.addEventListener('message', (event) => {
+          if (event.origin !== 'https://giscus.app') return;
+          
+          const text = event.data.giscus?.discussion?.composer?.text;
+          if (text && text.length > 1000) {
+            alert("Comments are strictly limited to 1000 characters.");
+            
+            const allowedText = text.substring(0, 1000);
+            if (iframe.contentWindow) {
+              iframe.contentWindow.postMessage({
+                giscus: { setComposerText: allowedText }
+              }, 'https://giscus.app');
+            }
+          }
+        });
       }
+    });
+
+    // Start watching the wrapper for the iframe to appear
+    observer.observe(document.getElementById("my-isolated-giscus"), { 
+      childList: true, 
+      subtree: true 
     });
   })();
 </script>
+
+				
 
 
 
