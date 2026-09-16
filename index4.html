@@ -211,27 +211,39 @@
         <section class="comments-section">
 		            <h3 class="comments-title">Discussion</h3>
 					
-					<!-- 1. The custom theme style injector (FIXES THE DISAPPEARING BUTTON) -->
+					<!-- 1. The custom layout box styling -->
 <style>
   #my-isolated-giscus {
-    max-height: 500px;    /* Keeps the overall container at a controlled size */
-    overflow-y: auto;     /* Adds a scrollbar if the content grows too big */
-    border: 1px solid #e1e4e8; /* Optional: adds a nice clean border around the comment area */
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #e1e4e8;
     border-radius: 6px;
     padding: 10px;
   }
-  
-  /* Allow the internal frame to scale naturally inside our scroll box */
   iframe.giscus-frame {
     min-height: 400px !important; 
     width: 100% !important;
   }
+  /* Style for our live counter banner */
+  #giscus-counter {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #57606a;
+  }
+  #giscus-counter.over-limit {
+    color: #cf222e; /* Turns red if they go over */
+  }
 </style>
 
-<!-- 2. The dedicated placeholder for your comments -->
+<!-- 2. Live tracking counter banner -->
+<div id="giscus-counter">Characters: <span id="char-count">0</span> / 1000</div>
+
+<!-- 3. Giscus Container -->
 <div id="my-isolated-giscus"></div>
 
-<!-- 3. Combined Loader & Counter Alert Script -->
+<!-- 4. Combined Loader & Live Counter Script -->
 <script>
   (function() {
     const giscusScript = document.createElement("script");
@@ -243,7 +255,7 @@
     giscusScript.setAttribute("data-mapping", "pathname");
     giscusScript.setAttribute("data-strict", "0");
     giscusScript.setAttribute("data-reactions-enabled", "1");
-    giscusScript.setAttribute("data-emit-metadata", "1"); 
+    giscusScript.setAttribute("data-emit-metadata", "1"); // Tells Giscus to share typing stats
     giscusScript.setAttribute("data-input-position", "top"); 
     giscusScript.setAttribute("data-theme", "light"); 
     giscusScript.setAttribute("data-lang", "en");
@@ -252,20 +264,23 @@
 
     document.getElementById("my-isolated-giscus").appendChild(giscusScript);
 
-    // 4. Watch for character changes broadcasted by the comment engine
-    let alertFired = false;
+    // Watch for live typing data broadcasted from Giscus
     window.addEventListener('message', (event) => {
       if (event.origin !== 'https://giscus.app') return;
       
-      const text = event.data.giscus?.discussion?.composer?.text;
+      const text = event.data.giscus?.discussion?.composer?.text || "";
+      const countEl = document.getElementById("char-count");
+      const bannerEl = document.getElementById("giscus-counter");
       
-      if (text && text.length > 1000) {
-        if (!alertFired) {
-          alert("⚠️ Warning: Your comment is " + text.length + " characters long. Comments on this site are requested to be under 1000 characters. Content past 1000 characters may be subject to moderation.");
-          alertFired = true;
+      if (countEl && bannerEl) {
+        countEl.textContent = text.length;
+        
+        if (text.length > 1000) {
+          bannerEl.classList.add("over-limit");
+          countEl.textContent = text.length + " (Exceeds 1000 character limit!)";
+        } else {
+          bannerEl.classList.remove("over-limit");
         }
-      } else {
-        alertFired = false;
       }
     });
   })();
