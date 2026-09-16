@@ -211,11 +211,20 @@
         <section class="comments-section">
 		            <h3 class="comments-title">Discussion</h3>
 					
-					<!-- 1. The custom theme style injector -->
+					<!-- 1. The custom theme style injector (FIXES THE DISAPPEARING BUTTON) -->
 <style>
-  /* Lock the comment input box height so walls of text can't be typed easily */
+  #my-isolated-giscus {
+    max-height: 500px;    /* Keeps the overall container at a controlled size */
+    overflow-y: auto;     /* Adds a scrollbar if the content grows too big */
+    border: 1px solid #e1e4e8; /* Optional: adds a nice clean border around the comment area */
+    border-radius: 6px;
+    padding: 10px;
+  }
+  
+  /* Allow the internal frame to scale naturally inside our scroll box */
   iframe.giscus-frame {
-    max-height: 450px !important;
+    min-height: 400px !important; 
+    width: 100% !important;
   }
 </style>
 
@@ -234,7 +243,7 @@
     giscusScript.setAttribute("data-mapping", "pathname");
     giscusScript.setAttribute("data-strict", "0");
     giscusScript.setAttribute("data-reactions-enabled", "1");
-    giscusScript.setAttribute("data-emit-metadata", "1"); // REQUIRED: opens communication link
+    giscusScript.setAttribute("data-emit-metadata", "1"); 
     giscusScript.setAttribute("data-input-position", "top"); 
     giscusScript.setAttribute("data-theme", "light"); 
     giscusScript.setAttribute("data-lang", "en");
@@ -251,13 +260,11 @@
       const text = event.data.giscus?.discussion?.composer?.text;
       
       if (text && text.length > 1000) {
-        // Only show the pop-up warning alert once per typing session so it isn't annoying
         if (!alertFired) {
           alert("⚠️ Warning: Your comment is " + text.length + " characters long. Comments on this site are requested to be under 1000 characters. Content past 1000 characters may be subject to moderation.");
           alertFired = true;
         }
       } else {
-        // Reset the alert window trigger if they delete text back down under 1000 characters
         alertFired = false;
       }
     });
