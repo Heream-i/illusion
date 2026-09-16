@@ -210,48 +210,49 @@
         <!-- REAL FUNCTIONAL COMMENTS SECTION VIA GISCUS -->
         <section class="comments-section">
 		            <h3 class="comments-title">Discussion</h3>
-  <!-- 1. The native container Giscus looks for -->
-<div class="giscus"></div>
+					
+				<!-- 1. The dedicated placeholder for your comments -->
+<div id="my-isolated-giscus"></div>
 
-<!-- 2. The standard, robust HTML injection script -->
-<script src="https://giscus.app"
-        data-repo="heream-i/illusion"
-        data-repo-id="R_kgDOUY4IPg" 
-        data-category="General"
-        data-category-id="DIC_kwDOUY4IPs4DFl2K" 
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="1" 
-        data-input-position="top" 
-        data-theme="light"
-        data-lang="en"
-        crossorigin="anonymous"
-        async>
-</script>
-
-<!-- 3. Non-blocking character limiter script -->
+<!-- 2. Combined Loader & Character Limiter -->
 <script>
   (function() {
+    // Force build the script to prevent site scripts from turning the theme to "undefined"
+    const giscusScript = document.createElement("script");
+    giscusScript.src = "https://giscus.app/client.js";
+    giscusScript.setAttribute("data-repo", "heream-i/illusion");
+    giscusScript.setAttribute("data-repo-id", "R_kgDOUY4IPg"); // Keep your working code here
+    giscusScript.setAttribute("data-category", "General");
+    giscusScript.setAttribute("data-category-id", "DIC_kwDOUY4IPs4DFl2K"); // Keep your working code here
+    giscusScript.setAttribute("data-mapping", "pathname");
+    giscusScript.setAttribute("data-strict", "0");
+    giscusScript.setAttribute("data-reactions-enabled", "1");
+    giscusScript.setAttribute("data-emit-metadata", "1"); // Keeps text channel open
+    giscusScript.setAttribute("data-input-position", "top"); // Moves box to the top
+    giscusScript.setAttribute("data-theme", "light"); // HARD FORCES light theme layout
+    giscusScript.setAttribute("data-lang", "en");
+    giscusScript.crossOrigin = "anonymous";
+    giscusScript.async = true;
+
+    // Inject into our custom named div
+    document.getElementById("my-isolated-giscus").appendChild(giscusScript);
+
+    // 3. Monitor text inside the iframe for the 1000-character cap
     window.addEventListener('message', (event) => {
-      // Security check: Only process messages coming directly from Giscus
       if (event.origin !== 'https://giscus.app') return;
       if (!event.data || !event.data.giscus) return;
 
-      // Find the loaded iframe on the page
       const iframe = document.querySelector('iframe.giscus-frame');
       if (!iframe || !iframe.contentWindow) return;
 
-      // Listen to the text being typed
       const text = event.data.giscus.discussion?.composer?.text;
       
       if (text && text.length > 1000) {
         alert("Comments are strictly limited to 1000 characters.");
         
-        // Truncate the text back down to 1000 characters
         const allowedText = text.substring(0, 1000);
         
-        // Push the truncated text back into the Giscus comment box
+        // Overwrite text back down to the 1000-character count marker
         iframe.contentWindow.postMessage({
           giscus: { setComposerText: allowedText }
         }, 'https://giscus.app');
