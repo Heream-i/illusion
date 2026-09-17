@@ -103,7 +103,8 @@
         </header>
 
         <!-- FORM LAYER -->
-        <form id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+        <!-- <form id="contactForm" action="https://api.web3forms.com/submit" method="POST"> -->
+			<form id="contactForm">
             <input type="hidden" name="access_key" value="90788836-3480-4860-9b85-4d23cb77fb4a">	
             <input type="hidden" name="source_url" id="source_url">
             
@@ -177,15 +178,104 @@
 
 <!-- SINGLE CONSOLIDATED CONTROLLER SCRIPT BLOCK -->
 <script>
-    // Link form variables safely
-    const form = document.getElementById('contactForm');
-    const emailInput = document.getElementById('email');
-    const messageInput = document.getElementById('message');
-    const nameInput = document.getElementById('name');
-    const responseMessage = document.getElementById('responseMessage');
-    const btn = document.getElementById('submitBtn');
-    const spinner = document.getElementById('btnSpinner');
-    const backToTopBtn = document.getElementById("backToTop");
+	// FROM HERE
+// Link form variables safely
+const form = document.getElementById('contactForm');
+const emailInput = document.getElementById('email');
+const messageInput = document.getElementById('message');
+const nameInput = document.getElementById('name');
+const responseMessage = document.getElementById('responseMessage');
+const btn = document.getElementById('submitBtn');
+const spinner = document.getElementById('btnSpinner');
+const backToTopBtn = document.getElementById("backToTop");
+
+// Clear any text out on hard page reload
+if (responseMessage) {
+    responseMessage.textContent = '';
+    responseMessage.style.display = 'none';
+}
+
+// Automatically set the source URL before submitting
+const sourceUrlInput = document.getElementById('source_url');
+if (sourceUrlInput) {
+    sourceUrlInput.value = window.location.href;
+}
+
+// Handle the form submission
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Reset feedback text box instantly upon click
+    if (responseMessage) {
+        responseMessage.textContent = '';
+        responseMessage.style.display = 'none';
+    }
+
+    // INSTANT FEEDBACK: Lock button, trigger CSS colour change, and show spinner
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+    
+    const btnText = btn.querySelector('.btn-text');
+    if (btnText) btnText.textContent = 'Sending...';
+
+    // Pack data into standard stream format
+    const formData = new FormData(form);
+
+    // Modern Fetch Request targeting standard Web3Forms endpoint
+    fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData 
+    })
+    .then(response => response.json())
+    .then(result => {
+        // STRICT CHECK: If success flag is explicitly true, completely stop here and show success
+        if (result.success === true) {
+            if (responseMessage) {
+                responseMessage.style.display = 'block';
+                responseMessage.style.color = 'green';
+                responseMessage.textContent = 'Message sent successfully!';
+            }
+            form.reset(); // Safely clear all text fields
+            
+            // Clean up button states back to normal interactive view
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            if (btnText) btnText.textContent = 'Submit Form';
+            
+            // Reset character counter text to original size
+            const charCountElement = document.getElementById('charCount');
+            if (charCountElement) {
+                charCountElement.textContent = 'Characters remaining: 400';
+            }
+        } else {
+            // Only trigger error handling if the form was legitimately rejected
+            if (responseMessage) {
+                responseMessage.style.display = 'block';
+                responseMessage.style.color = 'red';
+                responseMessage.textContent = result.message || 'Submission failed. Please try again.';
+            }
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            if (btnText) btnText.textContent = 'Submit Form';
+        }
+    })
+    .catch(error => {
+        // Fallback catch block for total network failure (e.g. user offline entirely)
+        console.error('Submission error:', error);
+        if (responseMessage) {
+            responseMessage.style.display = 'block';
+            responseMessage.style.color = 'red';
+            responseMessage.textContent = 'Network connection issue. Please try again.';
+        }
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        if (btnText) btnText.textContent = 'Submit Form';
+    });
+});
+
+
+
+// TO HERE
 
     // Unified Character Counter Engine
     function countCharacters() {
