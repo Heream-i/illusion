@@ -211,46 +211,50 @@ form.addEventListener('submit', function(e) {
     const formData = new FormData(form);
 
     // 4. Send data to Web3Forms API
-    fetch('https://api.web3forms.com/submit', {
+    fetch('https://web3forms.com', {
         method: 'POST',
         body: formData 
     })
     .then(async (response) => {
         let result = await response.json();
         
-        // 5. Clean check: If Web3Forms says it went through, show success
-        if (result.success) {
+        // 5. SUCCESS CHECK: Strict validation on the explicit success boolean flag
+        if (result.success === true) {
             if (responseMessage) {
                 responseMessage.style.color = 'green';
                 responseMessage.textContent = 'Message sent successfully!';
             }
             form.reset(); // Clear form fields
             
-            // Clean up button state after successful delivery
+            // Reset character counter back to 400 safely if the function exists
+            const charCountElement = document.getElementById('charCount');
+            if (charCountElement) {
+                charCountElement.textContent = 'Characters remaining: 400';
+            }
+            
+            // Return button back to normal interactive state
             btn.disabled = false;
             spinner.style.display = 'none';
             if (btnText) btnText.textContent = 'Submit Form';
         } else {
-            // If Web3Forms specifically tells us what went wrong, pass it along
+            // Only throw an error if the submission genuinely failed on their dashboard
             throw new Error(result.message || 'Submission failed');
         }
     })
     .catch(error => {
-        // 6. Direct Error Output: Cleanly show whatever the actual problem was
+        // 6. ERROR HANDLING: Only displays if data genuinely failed to send
         if (responseMessage) {
             responseMessage.style.color = 'red';
-            // Strip out generic JS formatting to display only the true error text
             responseMessage.textContent = error.message.replace('Error: ', '');
         }
         console.error(error);
         
-        // Unlock button so the user can try again once the server recovers
+        // Unlock button so the user can try again
         btn.disabled = false;
         spinner.style.display = 'none';
         if (btnText) btnText.textContent = 'Submit Form';
     });
 });
-
 
 
 // TO HERE
