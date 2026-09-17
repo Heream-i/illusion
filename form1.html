@@ -178,9 +178,17 @@
 
 <!-- SINGLE CONSOLIDATED CONTROLLER SCRIPT BLOCK -->
 <script>
-	// FROM HERE
+    // Link form variables safely
+    /* const form = document.getElementById('contactForm');
+    const emailInput = document.getElementById('email');
+    const messageInput = document.getElementById('message');
+    const nameInput = document.getElementById('name');
+    const responseMessage = document.getElementById('responseMessage');
+    const btn = document.getElementById('submitBtn');
+    const spinner = document.getElementById('btnSpinner');
+    const backToTopBtn = document.getElementById("backToTop"); */
+	
 	// Link form variables safely
-
 const form = document.getElementById('contactForm');
 const emailInput = document.getElementById('email');
 const messageInput = document.getElementById('message');
@@ -191,67 +199,65 @@ const spinner = document.getElementById('btnSpinner');
 const backToTopBtn = document.getElementById("backToTop");
 
 // Automatically set the source URL before submitting
-const sourceUrlInput = document.getElementById('source_url');
-if (sourceUrlInput) {
-    sourceUrlInput.value = window.location.href;
-}
+document.getElementById('source_url').value = window.location.href;
 
 // Handle the form submission
 form.addEventListener('submit', function(e) {
     // 1. Stop the browser from refreshing or leaving the page
     e.preventDefault();
 
-    // 2. INSTANT FEEDBACK: Lock button, change colour, and show spinner
+    // 2. INSTANT FEEDBACK: Lock button, change colour (via CSS :disabled), and show spinner
     btn.disabled = true;
     spinner.style.display = 'inline-block';
     
+    // Optional: Update the text inside the button so the user knows it's working
     const btnText = btn.querySelector('.btn-text');
     if (btnText) btnText.textContent = 'Sending...';
 
-    // 3. Collect form data using standard FormData stream (matches the first version)
+    // 3. Prepare the data to be sent to Web3Forms
     const formData = new FormData(form);
+    const object = Object.fromEntries(formData);
+    const json = JSON.stringify(object);
 
-    // 4. Send data to Web3Forms API
-    fetch('https://web3forms.com', {
+    // 4. Send the form data in the background
+    fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        body: formData // Using standard payload stream
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: json
     })
     .then(async (response) => {
-        let result = await response.json();
-        
-        // 5. Your exact success check logic wrapped around the stream structure
-        if (response.status === 200 || result.success) {
+        let res = await response.json();
+        if (response.status == 200) {
+            // Success! Tell the user it sent.
             if (responseMessage) {
-                responseMessage.style.color = 'green';
-                responseMessage.textContent = 'Message sent successfully!';
+                responseMessage.style.color = "green";
+                responseMessage.textContent = "Thank you! Your message has been sent successfully.";
             }
-            form.reset(); // Clear form fields
-            
-            // Clean up button state after successful delivery
-            btn.disabled = false;
-            spinner.style.display = 'none';
-            if (btnText) btnText.textContent = 'Submit Form';
+            form.reset(); // Clear the form fields
         } else {
-            throw new Error(result.message || 'Submission failed');
+            // Server error response
+            throw new Error(res.message);
         }
     })
     .catch(error => {
-        // Fallback if network drops or server fails
+        // Error handling: Alert the user
         if (responseMessage) {
-            responseMessage.style.color = 'red';
-            responseMessage.textContent = 'Something went wrong. Please try again.';
+            responseMessage.style.color = "red";
+            responseMessage.textContent = "Something went wrong. Please try again.";
         }
-        console.error(error);
-        
-        // Unlock button so the user can fix data and try again
+        console.log(error);
+    })
+    .finally(() => {
+        // 5. Reset the button state so they can try again if it failed
         btn.disabled = false;
         spinner.style.display = 'none';
         if (btnText) btnText.textContent = 'Submit Form';
     });
 });
 
-
-// TO HERE
 
     // Unified Character Counter Engine
     function countCharacters() {
