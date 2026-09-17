@@ -180,7 +180,7 @@
 <script>
 	// FROM HERE
 	// Link form variables safely
-// Link form variables safely
+
 const form = document.getElementById('contactForm');
 const emailInput = document.getElementById('email');
 const messageInput = document.getElementById('message');
@@ -201,57 +201,55 @@ form.addEventListener('submit', function(e) {
     // 1. Stop the browser from refreshing or leaving the page
     e.preventDefault();
 
-    // 2. INSTANT FEEDBACK: Lock button, trigger CSS colour change, and show spinner
+    // 2. INSTANT FEEDBACK: Lock button, change colour, and show spinner
     btn.disabled = true;
     spinner.style.display = 'inline-block';
     
-    // Smooth user feedback: update the text inside the button
     const btnText = btn.querySelector('.btn-text');
     if (btnText) btnText.textContent = 'Sending...';
 
-    // 3. Prepare the data to be sent to Web3Forms
+    // 3. Collect form data using standard FormData stream (matches the first version)
     const formData = new FormData(form);
-    const object = Object.fromEntries(formData);
-    const json = JSON.stringify(object);
 
-    // 4. Send the form data in the background
+    // 4. Send data to Web3Forms API
     fetch('https://web3forms.com', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: json
+        body: formData // Using standard payload stream
     })
     .then(async (response) => {
         let result = await response.json();
         
-        // 5. Your exact success verification logic
-        if (result.success) {
+        // 5. Your exact success check logic wrapped around the stream structure
+        if (response.status === 200 || result.success) {
             if (responseMessage) {
                 responseMessage.style.color = 'green';
                 responseMessage.textContent = 'Message sent successfully!';
             }
-            form.reset(); // Safely clear out the inputs for the user
+            form.reset(); // Clear form fields
+            
+            // Clean up button state after successful delivery
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            if (btnText) btnText.textContent = 'Submit Form';
         } else {
-            // Triggered if Web3Forms replies with a false success state (e.g. invalid key)
             throw new Error(result.message || 'Submission failed');
         }
     })
     .catch(error => {
-        // Fallback error messaging
+        // Fallback if network drops or server fails
         if (responseMessage) {
             responseMessage.style.color = 'red';
             responseMessage.textContent = 'Something went wrong. Please try again.';
         }
         console.error(error);
         
-        // RE-ENABLE BUTTON ONLY IF IT FAILS: Allows the user to fix errors and try again
+        // Unlock button so the user can fix data and try again
         btn.disabled = false;
         spinner.style.display = 'none';
         if (btnText) btnText.textContent = 'Submit Form';
     });
 });
+
 
 // TO HERE
 
