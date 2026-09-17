@@ -218,7 +218,7 @@ form.addEventListener('submit', function(e) {
     .then(async (response) => {
         let result = await response.json();
         
-        // 5. SUCCESS CHECK: Strict validation on the explicit success boolean flag
+        // 5. SUCCESS CHECK: Only run if explicitly true
         if (result.success === true) {
             if (responseMessage) {
                 responseMessage.style.color = 'green';
@@ -226,7 +226,7 @@ form.addEventListener('submit', function(e) {
             }
             form.reset(); // Clear form fields
             
-            // Reset character counter back to 400 safely if the function exists
+            // Reset character counter back to 400
             const charCountElement = document.getElementById('charCount');
             if (charCountElement) {
                 charCountElement.textContent = 'Characters remaining: 400';
@@ -237,24 +237,32 @@ form.addEventListener('submit', function(e) {
             spinner.style.display = 'none';
             if (btnText) btnText.textContent = 'Submit Form';
         } else {
-            // Only throw an error if the submission genuinely failed on their dashboard
+            // Throw the explicit API message if the submission failed on their server
             throw new Error(result.message || 'Submission failed');
         }
     })
     .catch(error => {
-        // 6. ERROR HANDLING: Only displays if data genuinely failed to send
+        // 6. SAFE ERROR HANDLING: Clean up network drops and server glitches
         if (responseMessage) {
             responseMessage.style.color = 'red';
-            responseMessage.textContent = error.message.replace('Error: ', '');
+            
+            // If the browser couldn't connect to the internet at all
+            if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+                responseMessage.textContent = 'Network error. Please check your internet connection and try again.';
+            } else {
+                // Display the specific server error cleanly
+                responseMessage.textContent = error.message.replace('Error: ', '');
+            }
         }
         console.error(error);
         
-        // Unlock button so the user can try again
+        // Always unlock the button so they can try to click it again
         btn.disabled = false;
         spinner.style.display = 'none';
         if (btnText) btnText.textContent = 'Submit Form';
     });
 });
+
 
 
 // TO HERE
