@@ -189,7 +189,7 @@ const btn = document.getElementById('submitBtn');
 const spinner = document.getElementById('btnSpinner');
 const backToTopBtn = document.getElementById("backToTop");
 
-// ⬇️ FIX 1: Ensure the message box is empty and hidden right when the page loads
+// Clear any text out on hard page reload
 if (responseMessage) {
     responseMessage.textContent = '';
     responseMessage.style.display = 'none';
@@ -203,93 +203,74 @@ if (sourceUrlInput) {
 
 // Handle the form submission
 form.addEventListener('submit', function(e) {
-    // 1. Stop the browser from refreshing or leaving the page
     e.preventDefault();
 
-    // ⬇️ FIX 2: Wipe out any old error text instantly so it doesn't flash on screen
+    // Reset feedback text box instantly upon click
     if (responseMessage) {
         responseMessage.textContent = '';
         responseMessage.style.display = 'none';
     }
 
-    // 2. INSTANT FEEDBACK: Lock button, change colour, and show spinner
+    // INSTANT FEEDBACK: Lock button, trigger CSS colour change, and show spinner
     btn.disabled = true;
     spinner.style.display = 'inline-block';
     
     const btnText = btn.querySelector('.btn-text');
     if (btnText) btnText.textContent = 'Sending...';
 
-    // 3. Collect form data using standard FormData stream
+    // Pack data into standard stream format
     const formData = new FormData(form);
 
-    // 4. Send data to Web3Forms API using a clean XMLHttpRequest connection
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://api.web3forms.com/submit', true);
-
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            try {
-                const result = JSON.parse(xhr.responseText);
-                
-                // 5. SUCCESS CHECK: Only run if explicit true
-                if (result.success) {
-                    if (responseMessage) {
-                        responseMessage.style.display = 'block';
-                        responseMessage.style.color = 'green';
-                        responseMessage.textContent = 'Message sent successfully!';
-                    }
-                    form.reset(); // Clear form fields
-                    
-                    // Reset character counter back to 400
-                    const charCountElement = document.getElementById('charCount');
-                    if (charCountElement) {
-                        charCountElement.textContent = 'Characters remaining: 400';
-                    }
-                } else {
-                    // Handle a clean, singular server rejection error
-                    if (responseMessage) {
-                        responseMessage.style.display = 'block';
-                        responseMessage.style.color = 'red';
-                        responseMessage.textContent = result.message || 'Submission failed.';
-                    }
-                }
-            } catch (err) {
-                // Fallback if the response isn't clean JSON text but the mail arrived
-                if (responseMessage) {
-                    responseMessage.style.display = 'block';
-                    responseMessage.style.color = 'green';
-                    responseMessage.textContent = 'Message sent successfully!';
-                }
-                form.reset();
+    // Modern Fetch Request targeting standard Web3Forms endpoint
+    fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData 
+    })
+    .then(response => response.json())
+    .then(result => {
+        // STRICT CHECK: If success flag is explicitly true, completely stop here and show success
+        if (result.success === true) {
+            if (responseMessage) {
+                responseMessage.style.display = 'block';
+                responseMessage.style.color = 'green';
+                responseMessage.textContent = 'Message sent successfully!';
+            }
+            form.reset(); // Safely clear all text fields
+            
+            // Clean up button states back to normal interactive view
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            if (btnText) btnText.textContent = 'Submit Form';
+            
+            // Reset character counter text to original size
+            const charCountElement = document.getElementById('charCount');
+            if (charCountElement) {
+                charCountElement.textContent = 'Characters remaining: 400';
             }
         } else {
-            // Handle formal server status errors
+            // Only trigger error handling if the form was legitimately rejected
             if (responseMessage) {
                 responseMessage.style.display = 'block';
                 responseMessage.style.color = 'red';
-                responseMessage.textContent = 'Server error. Please try again later.';
+                responseMessage.textContent = result.message || 'Submission failed. Please try again.';
             }
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            if (btnText) btnText.textContent = 'Submit Form';
         }
-
-        // Always clean up button state after the response is completed
-        btn.disabled = false;
-        spinner.style.display = 'none';
-        if (btnText) btnText.textContent = 'Submit Form';
-    };
-
-    xhr.onerror = function () {
+    })
+    .catch(error => {
+        // Fallback catch block for total network failure (e.g. user offline entirely)
+        console.error('Submission error:', error);
         if (responseMessage) {
             responseMessage.style.display = 'block';
             responseMessage.style.color = 'red';
-            responseMessage.textContent = 'Network connection issue. Please check your internet connection.';
+            responseMessage.textContent = 'Network connection issue. Please try again.';
         }
         btn.disabled = false;
         spinner.style.display = 'none';
         if (btnText) btnText.textContent = 'Submit Form';
-    };
-
-    // Send the data packet out
-    xhr.send(formData);
+    });
 });
 
 
