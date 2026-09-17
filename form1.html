@@ -179,7 +179,7 @@
 <!-- SINGLE CONSOLIDATED CONTROLLER SCRIPT BLOCK -->
 <script>
 	// FROM HERE
-	// Link form variables safely
+// Link form variables safely
 const form = document.getElementById('contactForm');
 const emailInput = document.getElementById('email');
 const messageInput = document.getElementById('message');
@@ -207,19 +207,19 @@ form.addEventListener('submit', function(e) {
     const btnText = btn.querySelector('.btn-text');
     if (btnText) btnText.textContent = 'Sending...';
 
-    // 3. Collect form data using standard FormData stream (matches the first version)
+    // 3. Collect form data using standard FormData stream
     const formData = new FormData(form);
 
     // 4. Send data to Web3Forms API
-    fetch('https://web3forms.com', {
+    fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        body: formData // Using standard payload stream
+        body: formData 
     })
     .then(async (response) => {
         let result = await response.json();
         
-        // 5. Your exact success check logic wrapped around the stream structure
-        if (response.status === 200 || result.success) {
+        // 5. Clean check: If Web3Forms says it went through, show success
+        if (result.success) {
             if (responseMessage) {
                 responseMessage.style.color = 'green';
                 responseMessage.textContent = 'Message sent successfully!';
@@ -231,18 +231,20 @@ form.addEventListener('submit', function(e) {
             spinner.style.display = 'none';
             if (btnText) btnText.textContent = 'Submit Form';
         } else {
+            // If Web3Forms specifically tells us what went wrong, pass it along
             throw new Error(result.message || 'Submission failed');
         }
     })
     .catch(error => {
-        // Fallback if network drops or server fails
+        // 6. Direct Error Output: Cleanly show whatever the actual problem was
         if (responseMessage) {
             responseMessage.style.color = 'red';
-            responseMessage.textContent = 'Something went wrong. Please try again.';
+            // Strip out generic JS formatting to display only the true error text
+            responseMessage.textContent = error.message.replace('Error: ', '');
         }
         console.error(error);
         
-        // Unlock button so the user can fix data and try again
+        // Unlock button so the user can try again once the server recovers
         btn.disabled = false;
         spinner.style.display = 'none';
         if (btnText) btnText.textContent = 'Submit Form';
