@@ -189,6 +189,12 @@ const btn = document.getElementById('submitBtn');
 const spinner = document.getElementById('btnSpinner');
 const backToTopBtn = document.getElementById("backToTop");
 
+// ⬇️ FIX 1: Ensure the message box is empty and hidden right when the page loads
+if (responseMessage) {
+    responseMessage.textContent = '';
+    responseMessage.style.display = 'none';
+}
+
 // Automatically set the source URL before submitting
 const sourceUrlInput = document.getElementById('source_url');
 if (sourceUrlInput) {
@@ -200,6 +206,12 @@ form.addEventListener('submit', function(e) {
     // 1. Stop the browser from refreshing or leaving the page
     e.preventDefault();
 
+    // ⬇️ FIX 2: Wipe out any old error text instantly so it doesn't flash on screen
+    if (responseMessage) {
+        responseMessage.textContent = '';
+        responseMessage.style.display = 'none';
+    }
+
     // 2. INSTANT FEEDBACK: Lock button, change colour, and show spinner
     btn.disabled = true;
     spinner.style.display = 'inline-block';
@@ -210,57 +222,74 @@ form.addEventListener('submit', function(e) {
     // 3. Collect form data using standard FormData stream
     const formData = new FormData(form);
 
-    // 4. Send data to Web3Forms API
-    fetch('https://web3forms.com', {
-        method: 'POST',
-        body: formData 
-    })
-    .then(async (response) => {
-        let result = await response.json();
-        
-        // 5. SUCCESS CHECK: Only run if explicitly true
-        if (result.success === true) {
-            if (responseMessage) {
-                responseMessage.style.color = 'green';
-                responseMessage.textContent = 'Message sent successfully!';
+    // 4. Send data to Web3Forms API using a clean XMLHttpRequest connection
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://api.web3forms.com/submit', true);
+
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            try {
+                const result = JSON.parse(xhr.responseText);
+                
+                // 5. SUCCESS CHECK: Only run if explicit true
+                if (result.success) {
+                    if (responseMessage) {
+                        responseMessage.style.display = 'block';
+                        responseMessage.style.color = 'green';
+                        responseMessage.textContent = 'Message sent successfully!';
+                    }
+                    form.reset(); // Clear form fields
+                    
+                    // Reset character counter back to 400
+                    const charCountElement = document.getElementById('charCount');
+                    if (charCountElement) {
+                        charCountElement.textContent = 'Characters remaining: 400';
+                    }
+                } else {
+                    // Handle a clean, singular server rejection error
+                    if (responseMessage) {
+                        responseMessage.style.display = 'block';
+                        responseMessage.style.color = 'red';
+                        responseMessage.textContent = result.message || 'Submission failed.';
+                    }
+                }
+            } catch (err) {
+                // Fallback if the response isn't clean JSON text but the mail arrived
+                if (responseMessage) {
+                    responseMessage.style.display = 'block';
+                    responseMessage.style.color = 'green';
+                    responseMessage.textContent = 'Message sent successfully!';
+                }
+                form.reset();
             }
-            form.reset(); // Clear form fields
-            
-            // Reset character counter back to 400
-            const charCountElement = document.getElementById('charCount');
-            if (charCountElement) {
-                charCountElement.textContent = 'Characters remaining: 400';
-            }
-            
-            // Return button back to normal interactive state
-            btn.disabled = false;
-            spinner.style.display = 'none';
-            if (btnText) btnText.textContent = 'Submit Form';
         } else {
-            // Throw the explicit API message if the submission failed on their server
-            throw new Error(result.message || 'Submission failed');
-        }
-    })
-    .catch(error => {
-        // 6. SAFE ERROR HANDLING: Clean up network drops and server glitches
-        if (responseMessage) {
-            responseMessage.style.color = 'red';
-            
-            // If the browser couldn't connect to the internet at all
-            if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-                responseMessage.textContent = 'Network error. Please check your internet connection and try again.';
-            } else {
-                // Display the specific server error cleanly
-                responseMessage.textContent = error.message.replace('Error: ', '');
+            // Handle formal server status errors
+            if (responseMessage) {
+                responseMessage.style.display = 'block';
+                responseMessage.style.color = 'red';
+                responseMessage.textContent = 'Server error. Please try again later.';
             }
         }
-        console.error(error);
-        
-        // Always unlock the button so they can try to click it again
+
+        // Always clean up button state after the response is completed
         btn.disabled = false;
         spinner.style.display = 'none';
         if (btnText) btnText.textContent = 'Submit Form';
-    });
+    };
+
+    xhr.onerror = function () {
+        if (responseMessage) {
+            responseMessage.style.display = 'block';
+            responseMessage.style.color = 'red';
+            responseMessage.textContent = 'Network connection issue. Please check your internet connection.';
+        }
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        if (btnText) btnText.textContent = 'Submit Form';
+    };
+
+    // Send the data packet out
+    xhr.send(formData);
 });
 
 
