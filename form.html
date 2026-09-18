@@ -105,8 +105,7 @@
 
         <!-- FORM LAYER -->
         <form id="contactForm" action="https://api.web3forms.com/submit" method="POST">
-            <input type="hidden" name="access_key" value="90788836-3480-4860-9b85-4d23cb77fb4a">
-			<input type="hidden" name="redirect" value="https://heream-i.github.io/illusion/success.html">			
+            <input type="hidden" name="access_key" value="90788836-3480-4860-9b85-4d23cb77fb4a">	
             <input type="hidden" name="source_url" id="source_url">
             
             <!-- Web3Forms Bot protection checkbox layer (Hidden from humans) -->
@@ -178,6 +177,7 @@
 		<!-- COPY TO HERE. -->
 
 <!-- SINGLE CONSOLIDATED CONTROLLER SCRIPT BLOCK -->
+<!-- SINGLE CONSOLIDATED CONTROLLER SCRIPT BLOCK -->
 <script>
     // Link form variables safely
     const form = document.getElementById('contactForm');
@@ -188,6 +188,9 @@
     const btn = document.getElementById('submitBtn');
     const spinner = document.getElementById('btnSpinner');
     const backToTopBtn = document.getElementById("backToTop");
+
+    // Global variable to store bad words in memory instantly on page load
+    let badWordsList = [];
 
     // Unified Character Counter Engine
     function countCharacters() {
@@ -203,10 +206,25 @@
         messageInput.addEventListener('input', countCharacters);
     }
 
+    // Profanity dictionary reader loop (Runs instantly on page load)
+    async function preloadBadWords() {
+        try {
+            const response = await fetch('./badwords.txt');
+            if (!response.ok) return; 
+            const text = await response.text();
+            badWordsList = text.split(/\r?\n/).map(word => word.trim().toLowerCase()).filter(word => word.length > 0);
+        } catch (e) {
+            console.error("Profanity database file not found yet.", e);
+        }
+    }
+
     // Set up everything safely only after the HTML fully unpacks
     window.addEventListener('DOMContentLoaded', (event) => {
         // Initialize character counter view
         countCharacters();
+        
+        // Preload the bad words list immediately into memory
+        preloadBadWords();
         
         // Populate current destination URL tracking
         const sourceUrlInput = document.getElementById('source_url');
@@ -221,39 +239,29 @@
         }
     });
 
-    // Email checker expression
+    // Email checker expression (Fixed standard format)
     function isValidEmail(email) {
-        const emailRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]*[a-zA-Z0-9])?@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[A-Za-z]{2,}$/;
+		const emailRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]*[a-zA-Z0-9])?@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[A-Za-z]{2,}$/;
         return emailRegex.test(email.trim());
-    }
-
-    // Profanity dictionary reader loop
-    async function fetchBadWords() {
-        try {
-            const response = await fetch('./badwords.txt');
-            if (!response.ok) return []; 
-            const text = await response.text();
-            return text.split(/\r?\n/).map(word => word.trim().toLowerCase()).filter(word => word.length > 0);
-        } catch (e) {
-            console.error("Profanity database file not found yet.", e);
-            return [];
-        }
     }
 
     // Primary Submission Event Guard Loop
     if (form) {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault(); 
-            
-            // Clear message strings
-            if (responseMessage) responseMessage.textContent = "";
+        form.addEventListener('submit', function(e) {
+            // Clear prior error borders and messages instantly
             if (emailInput) emailInput.classList.remove('error-border');
             if (messageInput) messageInput.classList.remove('error-border');
+            if (responseMessage) {
+                responseMessage.textContent = "";
+                responseMessage.style.display = "none";
+            }
 
             // 1. Web3Forms Anti-Bot Verification
             const botcheck = document.getElementById('botcheck');
             if (botcheck && botcheck.checked) {
+                e.preventDefault(); // Stop normal submission for bots
                 if (responseMessage) {
+                    responseMessage.style.display = "block";
                     responseMessage.style.color = 'green';
                     responseMessage.textContent = 'Message sent successfully!';
                 }
@@ -264,16 +272,17 @@
 
             // 2. Strict Email Formatting Check
             if (emailInput && !isValidEmail(emailInput.value)) {
+                e.preventDefault(); // STOP FORM SUBMISSION: Let user fix the email
                 emailInput.classList.add('error-border');
                 if (responseMessage) {
+                    responseMessage.style.display = "block";
                     responseMessage.style.color = 'red';
                     responseMessage.textContent = 'Please enter a valid email address structure (e.g., user@example.com).';
                 }
                 return;
             }
 
-            // 3. Phrase Filter Check
-            const badWordsList = await fetchBadWords();
+            // 3. Phrase Filter Check (Now checks instantly from memory with zero delay)
             const combinedInputText = `${nameInput ? nameInput.value : ''} ${emailInput ? emailInput.value : ''} ${messageInput ? messageInput.value : ''}`.toLowerCase();
             
             const containsProfanity = badWordsList.some(badWord => {
@@ -282,93 +291,56 @@
             });
 
             if (containsProfanity && messageInput) {
+                e.preventDefault(); // STOP FORM SUBMISSION INSTANTLY: Block bad words
                 messageInput.classList.add('error-border');
                 if (responseMessage) {
+                    responseMessage.style.display = "block";
                     responseMessage.style.color = 'red';
                     responseMessage.textContent = 'Your message contains language that is not permitted.';
                 }
                 return;
             }
 
-            // --- ALL TESTS PASSED: Send Form to Web3Forms ---
-            if (btn) btn.disabled = true;
+            // --- ALL TESTS PASSED SUCCESSFULLY ---
+            // Trigger Instant Button feedback, then let the page naturally submit to Web3Forms
+            if (btn) {
+                btn.style.backgroundColor = '#95a5a6'; // Instant grey change
+                btn.disabled = true; // Lock out multi-clicking bugs
+            }
+            
             const btnTextNode = btn ? btn.querySelector('.btn-text') : null;
             if (btnTextNode) btnTextNode.innerText = "Sending...";
-            if (spinner) spinner.style.display = "inline-block";
-
-            const formData = new FormData(form);
-
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Accept': 'application/json' }
-                });
-                
-               // NEW JAVASCRIPT STARTS
-
-// Link form variables safely
-const form = document.getElementById('contactForm');
-const emailInput = document.getElementById('email');
-const messageInput = document.getElementById('message');
-const nameInput = document.getElementById('name');
-const responseMessage = document.getElementById('responseMessage');
-const btn = document.getElementById('submitBtn');
-const spinner = document.getElementById('btnSpinner');
-const backToTopBtn = document.getElementById("backToTop");
-
-// Scroll Monitoring Engine
-window.addEventListener('scroll', function() {
-    if (backToTopBtn) {
-        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
-            backToTopBtn.classList.add("visible");
-        } else {
-            backToTopBtn.classList.remove("visible");
-        }
-    }
-});
-
-if (backToTopBtn) {
-    backToTopBtn.addEventListener("click", function() {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-    });
-}
-
-// ⬇️ CLEAN SUBMISSION ENGINE (Ensures the browser forwards to Web3Forms redirect)
-if (form) {
-    form.addEventListener('submit', function() {
-        const submitBtn = document.getElementById('submitBtn');
-        const btnSpinner = document.getElementById('btnSpinner');
-        
-        // 1. Instantly change the background colour to grey and disable to prevent double clicks
-        if (submitBtn) {
-            submitBtn.style.backgroundColor = '#95a5a6';
-            submitBtn.disabled = true;
             
-            // 2. Update text inside the button for real-time feedback
-            const btnText = submitBtn.querySelector('.btn-text');
-            if (btnText) {
-                btnText.textContent = 'Sending...';
+            if (spinner) {
+                spinner.style.display = "inline-block"; // Instant rotating spinner ring
+            }
+            
+            // The browser will now naturally execute the HTML POST action attribute 
+            // and seamlessly hop right over to your success page!
+        });
+    }
+
+    // Scroll Monitoring Engine
+    window.addEventListener('scroll', function() {
+        if (backToTopBtn) {
+            if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+                backToTopBtn.classList.add("visible");
+            } else {
+                backToTopBtn.classList.remove("visible");
             }
         }
-        
-        // 3. Instantly reveal the hidden rotating spinner ring
-        if (btnSpinner) {
-            btnSpinner.style.display = 'inline-block';
-        }
-        
-        // The browser safely handles the standard HTML POST request here,
-        // sending it directly to Web3Forms which triggers the page hop to success.html!
     });
-}
 
-// NEW JAVASCRIPT ENDS
-
+    if (backToTopBtn) {
+        backToTopBtn.addEventListener("click", function() {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        });
+    }
 	
-	    // MOBILE TOUCH DRIVER FOR DROPDOWN MENUS
+    // MOBILE TOUCH DRIVER FOR DROPDOWN MENUS
     const dropdowns = document.querySelectorAll('.dropdown');
 
     dropdowns.forEach(dropdown => {
@@ -376,27 +348,51 @@ if (form) {
         
         if (button) {
             button.addEventListener('click', function(e) {
-                // If on mobile/touch, intercept the click to toggle cleanly
                 if (window.innerWidth <= 620) {
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    // Close any other open dropdown first
                     dropdowns.forEach(other => {
                         if (other !== dropdown) other.classList.remove('active');
                     });
                     
-                    // Toggle the current dropdown menu layer
                     dropdown.classList.toggle('active');
                 }
             });
         }
     });
 
-    // Close dropdowns if the user taps anywhere else on the screen
     document.addEventListener('click', function() {
         dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
     });
+	
+	    // ⬇️ BACK BUTTON RESET ENGINE
+    // Automatically restores the button if a user clicks "Go Back" from the success page
+    window.addEventListener('pageshow', function(event) {
+        // Check if the page is loading from the browser's history/cache
+        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnSpinner = document.getElementById('btnSpinner');
+            
+            // 1. Re-enable the button and drop the grey styling override
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.style.backgroundColor = ''; // Reverts back to your original CSS color
+                
+                // 2. Restore the original text string
+                const btnText = submitBtn.querySelector('.btn-text');
+                if (btnText) {
+                    btnText.textContent = 'Submit Form';
+                }
+            }
+            
+            // 3. Hide the spinner ring out of sight
+            if (btnSpinner) {
+                btnSpinner.style.display = 'none';
+            }
+        }
+    });
+
 
 </script>
 
