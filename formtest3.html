@@ -365,6 +365,34 @@
     document.addEventListener('click', function() {
         dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
     });
+	
+	    // ⬇️ BACK BUTTON RESET ENGINE
+    // Automatically restores the button if a user clicks "Go Back" from the success page
+    window.addEventListener('pageshow', function(event) {
+        // Check if the page is loading from the browser's history/cache
+        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnSpinner = document.getElementById('btnSpinner');
+            
+            // 1. Re-enable the button and drop the grey styling override
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.style.backgroundColor = ''; // Reverts back to your original CSS color
+                
+                // 2. Restore the original text string
+                const btnText = submitBtn.querySelector('.btn-text');
+                if (btnText) {
+                    btnText.textContent = 'Submit Form';
+                }
+            }
+            
+            // 3. Hide the spinner ring out of sight
+            if (btnSpinner) {
+                btnSpinner.style.display = 'none';
+            }
+        }
+    });
+
 
 </script>
 
