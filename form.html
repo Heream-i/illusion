@@ -105,7 +105,8 @@
 
         <!-- FORM LAYER -->
         <form id="contactForm" action="https://api.web3forms.com/submit" method="POST">
-            <input type="hidden" name="access_key" value="90788836-3480-4860-9b85-4d23cb77fb4a">	
+            <input type="hidden" name="access_key" value="90788836-3480-4860-9b85-4d23cb77fb4a">
+			<input type="hidden" name="redirect" value="https://heream-i.github.io/illusion/success.html">			
             <input type="hidden" name="source_url" id="source_url">
             
             <!-- Web3Forms Bot protection checkbox layer (Hidden from humans) -->
@@ -351,6 +352,34 @@
             });
         });
     }
+	
+	// NEW STARTS
+	
+	document.getElementById('contactForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    const spinner = document.getElementById('btnSpinner');
+    
+    // 1. Instantly change the background colour to grey
+    btn.style.backgroundColor = '#95a5a6';
+    btn.disabled = true; // Lock the button out
+    
+    // 2. Instantly reveal the hidden rotating spinner ring
+    if (spinner) {
+        spinner.style.display = 'inline-block';
+    }
+    
+    // 3. Update text for real-time visual feedback
+    const btnText = btn.querySelector('.btn-text');
+    if (btnText) {
+        btnText.textContent = 'Sending...';
+    }
+    
+    // The browser naturally hands off to Web3Forms here, 
+    // which processes your file and forces the direct page hop!
+});
+
+	
+	// NEW ENDS
 	
 	    // MOBILE TOUCH DRIVER FOR DROPDOWN MENUS
     const dropdowns = document.querySelectorAll('.dropdown');
