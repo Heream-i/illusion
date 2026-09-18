@@ -305,81 +305,68 @@
                     headers: { 'Accept': 'application/json' }
                 });
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    if (responseMessage) {
-                        responseMessage.style.color = 'green';
-                        responseMessage.textContent = 'Message sent successfully!';
-                    }
-                    form.reset();
-                    countCharacters(); 
-                } else {
-                    if (responseMessage) {
-                        responseMessage.style.color = 'red';
-                        responseMessage.textContent = result.message || 'Submission failed.';
-                    }
-                }
-            } catch (error) {
-                if (responseMessage) {
-                    responseMessage.style.color = 'red';
-                    responseMessage.textContent = 'Error connecting to the mail server.';
-                }
-            } finally {
-                if (btn) btn.disabled = false;
-                if (btnTextNode) btnTextNode.innerText = "Submit Form";
-                if (spinner) spinner.style.display = "none";
-            }
-        });
-    }
+               // NEW JAVASCRIPT STARTS
 
-    // Scroll Monitoring Engine
-    window.addEventListener('scroll', function() {
-        if (backToTopBtn) {
-            if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
-                backToTopBtn.classList.add("visible");
-            } else {
-                backToTopBtn.classList.remove("visible");
-            }
-        }
-    });
+// Link form variables safely
+const form = document.getElementById('contactForm');
+const emailInput = document.getElementById('email');
+const messageInput = document.getElementById('message');
+const nameInput = document.getElementById('name');
+const responseMessage = document.getElementById('responseMessage');
+const btn = document.getElementById('submitBtn');
+const spinner = document.getElementById('btnSpinner');
+const backToTopBtn = document.getElementById("backToTop");
 
+// Scroll Monitoring Engine
+window.addEventListener('scroll', function() {
     if (backToTopBtn) {
-        backToTopBtn.addEventListener("click", function() {
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
-        });
+        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+            backToTopBtn.classList.add("visible");
+        } else {
+            backToTopBtn.classList.remove("visible");
+        }
     }
-	
-	// NEW STARTS
-	
-	document.getElementById('contactForm').addEventListener('submit', function() {
-    const btn = document.getElementById('submitBtn');
-    const spinner = document.getElementById('btnSpinner');
-    
-    // 1. Instantly change the background colour to grey
-    btn.style.backgroundColor = '#95a5a6';
-    btn.disabled = true; // Lock the button out
-    
-    // 2. Instantly reveal the hidden rotating spinner ring
-    if (spinner) {
-        spinner.style.display = 'inline-block';
-    }
-    
-    // 3. Update text for real-time visual feedback
-    const btnText = btn.querySelector('.btn-text');
-    if (btnText) {
-        btnText.textContent = 'Sending...';
-    }
-    
-    // The browser naturally hands off to Web3Forms here, 
-    // which processes your file and forces the direct page hop!
 });
 
-	
-	// NEW ENDS
+if (backToTopBtn) {
+    backToTopBtn.addEventListener("click", function() {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    });
+}
+
+// ⬇️ CLEAN SUBMISSION ENGINE (Ensures the browser forwards to Web3Forms redirect)
+if (form) {
+    form.addEventListener('submit', function() {
+        const submitBtn = document.getElementById('submitBtn');
+        const btnSpinner = document.getElementById('btnSpinner');
+        
+        // 1. Instantly change the background colour to grey and disable to prevent double clicks
+        if (submitBtn) {
+            submitBtn.style.backgroundColor = '#95a5a6';
+            submitBtn.disabled = true;
+            
+            // 2. Update text inside the button for real-time feedback
+            const btnText = submitBtn.querySelector('.btn-text');
+            if (btnText) {
+                btnText.textContent = 'Sending...';
+            }
+        }
+        
+        // 3. Instantly reveal the hidden rotating spinner ring
+        if (btnSpinner) {
+            btnSpinner.style.display = 'inline-block';
+        }
+        
+        // The browser safely handles the standard HTML POST request here,
+        // sending it directly to Web3Forms which triggers the page hop to success.html!
+    });
+}
+
+// NEW JAVASCRIPT ENDS
+
 	
 	    // MOBILE TOUCH DRIVER FOR DROPDOWN MENUS
     const dropdowns = document.querySelectorAll('.dropdown');
