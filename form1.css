@@ -1,0 +1,55 @@
+/* 1. Elevate the form container to be bright and sharp */
+.dark-theme-override {
+    background-color: #1a2230 !important; /* Rich obsidian navy background */
+    padding: 30px;
+    border-radius: 12px;
+    border: 2px solid #3b4a60 !important; /* Sharp, high-contrast outer border */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 2. Format the form input text channels */
+.dark-theme-override input[type="text"],
+.dark-theme-override input[type="email"],
+.dark-theme-override textarea {
+    background-color: #0d131a !important; /* Stark dark inner channel */
+    color: #ffffff !important; /* Forced crisp white text for typing */
+    border: 2px solid #4a5c78 !important; /* Bright, highly-visible default border */
+    border-radius: 6px !important;
+    padding: 12px 16px !important;
+    font-size: 1rem !important;
+    width: 100%;
+}
+
+/* 3. Force placeholder text to remain clear and readable */
+.dark-theme-override input::placeholder,
+.dark-theme-override textarea::placeholder {
+    color: #94a3b8 !important; /* Clear slate grey placeholder string */
+    opacity: 1 !important;
+}
+
+/* 4. 🌟 THE OVERRIDE ACCENT GLOW: Radiant neon border when clicked */
+.dark-theme-override input[type="text"]:focus,
+.dark-theme-override input[type="email"]:focus,
+.dark-theme-override textarea:focus {
+    outline: none !important;
+    border-color: #38bdf8 !important; /* Vibrant electric blue border focus */
+    background-color: #111a24 !important;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.35) !important; /* Distinct blue outer halo glow */
+}
+
+/* 5. Clean contrast formatting for labels and GDPR links */
+.dark-theme-override label {
+    display: block !important;
+    color: #f1f5f9 !important; /* Clean off-white label text */
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+}
+
+.dark-theme-override label a {
+    color: #38bdf8 !important; /* High-visibility sky blue for legal links */
+    text-decoration: underline !important;
+}
+
+#charCount {
+    color: #94a3b8 !important; /* Bright slate gray for character countdown */
+}
