@@ -1,55 +1,119 @@
-/* 1. Elevate the form container to be bright and sharp */
-.dark-theme-override {
-    background-color: #1a2230 !important; /* Rich obsidian navy background */
-    padding: 30px;
-    border-radius: 12px;
-    border: 2px solid #3b4a60 !important; /* Sharp, high-contrast outer border */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+/* ==========================================================================
+   1. CORE COLOR PALETTES (Light Mode Default / System Dark Mode Override)
+   ========================================================================== */
+:root {
+    /* ☀️ Clean Light Theme Variables */
+    --form-bg: #ffffff;
+    --form-border: #e2e8f0;
+    --input-bg: #f8fafc;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+    --label-text: #334155;
+    --placeholder-text: #94a3b8;
+    --focus-ring: rgba(0, 123, 255, 0.2);
+    --focus-border: #007bff;
+    --link-color: #0066cc;
+    --counter-color: #64748b;
 }
 
-/* 2. Format the form input text channels */
-.dark-theme-override input[type="text"],
-.dark-theme-override input[type="email"],
-.dark-theme-override textarea {
-    background-color: #0d131a !important; /* Stark dark inner channel */
-    color: #ffffff !important; /* Forced crisp white text for typing */
-    border: 2px solid #4a5c78 !important; /* Bright, highly-visible default border */
+/* Automatically switch themes if user's OS prefers Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* 🌙 Clean Dark Theme Variables */
+        --form-bg: #1a2230;
+        --form-border: #3b4a60;
+        --input-bg: #0d131a;
+        --input-border: #4a5c78;
+        --input-text: #ffffff;
+        --label-text: #f1f5f9;
+        --placeholder-text: #94a3b8;
+        --focus-ring: rgba(56, 189, 248, 0.35);
+        --focus-border: #38bdf8;
+        --link-color: #38bdf8;
+        --counter-color: #94a3b8;
+    }
+}
+
+/* 🔄 FORCED MANUAL OVERRIDE (For when a user clicks the toggle switch) */
+document-root-dark, [data-theme="dark"] {
+    --form-bg: #1a2230;
+    --form-border: #3b4a60;
+    --input-bg: #0d131a;
+    --input-border: #4a5c78;
+    --input-text: #ffffff;
+    --label-text: #f1f5f9;
+    --placeholder-text: #94a3b8;
+    --focus-ring: rgba(56, 189, 248, 0.35);
+    --focus-border: #38bdf8;
+    --link-color: #38bdf8;
+    --counter-color: #94a3b8;
+}
+
+/* ==========================================================================
+   2. THEME-AWARE DYNAMIC FORM STYLING
+   ========================================================================== */
+.form-theme-container {
+    background-color: var(--form-bg) !important;
+    padding: 30px;
+    border-radius: 12px;
+    border: 2px solid var(--form-border) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.form-theme-container input[type="text"],
+.form-theme-container input[type="email"],
+.form-theme-container textarea {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    border: 2px solid var(--input-border) !important;
     border-radius: 6px !important;
     padding: 12px 16px !important;
     font-size: 1rem !important;
     width: 100%;
+    transition: all 0.2s ease-in-out;
 }
 
-/* 3. Force placeholder text to remain clear and readable */
-.dark-theme-override input::placeholder,
-.dark-theme-override textarea::placeholder {
-    color: #94a3b8 !important; /* Clear slate grey placeholder string */
+.form-theme-container input::placeholder,
+.form-theme-container textarea::placeholder {
+    color: var(--placeholder-text) !important;
     opacity: 1 !important;
 }
 
-/* 4. 🌟 THE OVERRIDE ACCENT GLOW: Radiant neon border when clicked */
-.dark-theme-override input[type="text"]:focus,
-.dark-theme-override input[type="email"]:focus,
-.dark-theme-override textarea:focus {
+/* Neon Focus Glow (Adapts automatically to the active theme context) */
+.form-theme-container input[type="text"]:focus,
+.form-theme-container input[type="email"]:focus,
+.form-theme-container textarea:focus {
     outline: none !important;
-    border-color: #38bdf8 !important; /* Vibrant electric blue border focus */
-    background-color: #111a24 !important;
-    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.35) !important; /* Distinct blue outer halo glow */
+    border-color: var(--focus-border) !important;
+    box-shadow: 0 0 0 4px var(--focus-ring) !important;
 }
 
-/* 5. Clean contrast formatting for labels and GDPR links */
-.dark-theme-override label {
+.form-theme-container label {
     display: block !important;
-    color: #f1f5f9 !important; /* Clean off-white label text */
+    color: var(--label-text) !important;
     font-weight: 600 !important;
     margin-bottom: 8px !important;
 }
 
-.dark-theme-override label a {
-    color: #38bdf8 !important; /* High-visibility sky blue for legal links */
+.form-theme-container label a {
+    color: var(--link-color) !important;
     text-decoration: underline !important;
 }
 
 #charCount {
-    color: #94a3b8 !important; /* Bright slate gray for character countdown */
+    color: var(--counter-color) !important;
+}
+
+/* Simple Style for the Toggle Button Switch */
+.theme-toggle-btn {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 2px solid var(--form-border);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 20px;
+    transition: all 0.2s ease;
 }

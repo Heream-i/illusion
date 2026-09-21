@@ -105,11 +105,21 @@
         </header>
 
         <!-- FORM LAYER -->
-		<!-- HTML Structural Layout Update -->
+		<!-- HTML Structural Layout Update 
 			<div class="dark-theme-override">
-        <form id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+			<form id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+				<input type="hidden" name="access_key" value="90788836-3480-4860-9b85-4d23cb77fb4a">	
+				<input type="hidden" name="redirect" value="https://github.io"> -->
+				
+				<!-- ☀️ Button to switch light/dark mode manual settings manually -->
+		<button type="button" class="theme-toggle-btn" id="themeToggler">🌙 Switch Theme</button>
+
+		<div class="form-theme-container">
+			<form id="contactForm" action="https://web3forms.com" method="POST">
 				<input type="hidden" name="access_key" value="90788836-3480-4860-9b85-4d23cb77fb4a">	
 				<input type="hidden" name="redirect" value="https://github.io">
+        
+        <!-- Keep your standard labels, message box inputs, and submitBtn exactly as they are -->
             
             <!-- Web3Forms Bot protection checkbox layer (Hidden from humans) -->
             <div class="form-group hidden-field" style="display: none;">
@@ -395,6 +405,37 @@
             }
         }
     });
+	
+	    // ⬇️ DYNAMIC NATIVE THEME CONTROLLER ENGINE
+    const themeToggler = document.getElementById('themeToggler');
+    
+    // Check if the visitor has a saved theme choice from a past session
+    const currentTheme = localStorage.getItem('user-site-theme');
+    if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        if (themeToggler) themeToggler.textContent = '☀️ Light Mode';
+    }
+
+    if (themeToggler) {
+        themeToggler.addEventListener('click', function() {
+            // Check the active data attribute state
+            let theme = document.documentElement.getAttribute('data-theme');
+            
+            if (theme === 'dark') {
+                // Remove dark attributes to snap smoothly back into high contrast Light Mode
+                document.documentElement.removeAttribute('data-theme');
+                themeToggler.textContent = '🌙 Dark Mode';
+                localStorage.setItem('user-site-theme', 'light');
+            } else {
+                // Inject dark mode variables natively
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeToggler.textContent = '☀️ Light Mode';
+                localStorage.setItem('user-site-theme', 'dark');
+            }
+        });
+    }
+
+	
 
 
 </script>
