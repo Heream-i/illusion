@@ -43,7 +43,13 @@
             outline: 2px solid #0066cc !important;
             outline-offset: 4px;
             border-radius: 2px;
-        } 
+        } 		
+		.update-text {
+    text-align: center;
+    width: 100%;
+    margin-top: 15px; /* Creates a clean gap above the text */
+    margin-bottom: 15px; /* Creates a clean gap below the text */
+}
     </style>
 </head>
 <body>
@@ -91,6 +97,7 @@
         <header style="margin-top: 60px; padding-top: 20px;">
             <div class="public-header">		
                 <p class="custom3" style="font-size: 2rem; font-weight: bold; margin: 0 0 10px 0;">Contact Form</p>
+				<p class="update-text">Last Updated: <span id="last-updated-date">Loading...</span></p>
                 <p class="custom4">Published as an independent commentary and public interest review revealing local authority building control negligence under primary UK law.</p>
                 <br>
                 <p class="custom5" style="color: red; font-weight: bold;">By accessing and using this website, you agree to our <a href="terms_of_use.html" target="_blank">Terms of Use</a>, <a href="privacy_policy.html" target="_blank">Privacy Policy</a>, and Legal Disclaimer (see below).</p>
@@ -184,6 +191,8 @@
                 <p style="margin: 0; font-size: 0.9rem; line-height: 1.5; text-align: justify; color: #444;">
                 The content provided on this page constitutes independent historical commentary and public-interest analysis regarding the impacts of Anns v Merton and Murphy v Brentwood on the British building industry. It is compiled for informational and educational purposes to critique how judicial decisions have departed from the absolute statutory duties originally imposed by Parliament under the <strong>Public Health Act 1936 and subsequent Acts.</strong> This text does not constitute formal legal counsel, professional architectural or structural engineering services, or actionable financial guidance. Reading or interacting with this text does not establish a professional-client relationship.<br><br><strong>Statutory Limitation of Liability:</strong> To the maximum extent permitted by UK law, and strictly as mandated under Section 2(1) of the <strong>Unfair Contract Terms Act 1977</strong> (which prohibits the exclusion of liability for death or personal injury resulting from negligence), neither the author nor the website owner shall be held liable for any financial loss, property damage, administrative penalties, or personal distress resulting from the use of, or reliance upon, this information. The author maintains that while primary UK statutes impose absolute, non-negotiable duties upon public authorities, the separate statutory framework governing private publications requires this specific legal formulation to prevent vexatious censorship by local authorities. This website and its contents are governed by and construed in accordance with the laws of England and Wales.</p>
             </div>
+			<p class="update-text">Last Updated: <span id="last-updated-date">Loading...</span></p>
+
         </footer>
 		</div>
 		<!-- COPY TO HERE. -->
@@ -233,6 +242,20 @@
     window.addEventListener('DOMContentLoaded', (event) => {
         // Initialize character counter view
         countCharacters();
+		
+		// Automatically update the "Last Updated" text using the file date
+		const updateSpan = document.getElementById('last-updated-date');
+		if (updateSpan) {
+			const fileDate = new Date(document.lastModified);
+			// Formats the date cleanly (e.g., "September 21, 2026")
+			const formattedDate = fileDate.toLocaleDateString('en-GB', {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric'
+			});
+			updateSpan.textContent = formattedDate;
+		}
+
         
         // Preload the bad words list immediately into memory
         preloadBadWords();
