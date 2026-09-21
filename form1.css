@@ -1,72 +1,59 @@
-/* ==========================================================================
-   1. CORE COLOR PALETTES (Light Mode Default / System Dark Mode Override)
-   ========================================================================== */
+/* ==========================================
+   1. DEFINE VARIABLES FOR BOTH THEMES
+   ========================================== */
 :root {
-    /* ☀️ Clean Light Theme Variables */
-    --form-bg: #ffffff;
-    --form-border: #e2e8f0;
-    --input-bg: #f8fafc;
-    --input-border: #cbd5e1;
-    --input-text: #0f172a;
-    --label-text: #334155;
-    --placeholder-text: #94a3b8;
-    --focus-ring: rgba(0, 123, 255, 0.2);
-    --focus-border: #007bff;
-    --link-color: #0066cc;
-    --counter-color: #64748b;
+    /* ☀️ High-Contrast Light Mode Settings */
+    --form-card-bg: #ffffff !important;
+    --form-outer-border: #cbd5e1 !important;
+    --input-field-bg: #f8fafc !important;
+    --input-field-border: #94a3b8 !important;
+    --input-field-text: #0f172a !important;
+    --form-label-text: #1e293b !important;
+    --form-desc-text: #475569 !important;
+    --link-text-color: #0066cc !important;
 }
 
-/* Automatically switch themes if user's OS prefers Dark Mode */
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* 🌙 Clean Dark Theme Variables */
-        --form-bg: #1a2230;
-        --form-border: #3b4a60;
-        --input-bg: #0d131a;
-        --input-border: #4a5c78;
-        --input-text: #ffffff;
-        --label-text: #f1f5f9;
-        --placeholder-text: #94a3b8;
-        --focus-ring: rgba(56, 189, 248, 0.35);
-        --focus-border: #38bdf8;
-        --link-color: #38bdf8;
-        --counter-color: #94a3b8;
-    }
+/* 🌙 High-Contrast Dark Mode Settings (Active when toggle adds data-theme) */
+[data-theme="dark"] {
+    --form-card-bg: #1e2530 !important;
+    --form-outer-border: #3b4a60 !important;
+    --input-field-bg: #0d131a !important;
+    --input-field-border: #4a5c78 !important;
+    --input-field-text: #ffffff !important;
+    --form-label-text: #f1f5f9 !important;
+    --form-desc-text: #cbd5e1 !important;
+    --link-text-color: #38bdf8 !important;
 }
 
-/* 🔄 FORCED MANUAL OVERRIDE (For when a user clicks the toggle switch) */
-document-root-dark, [data-theme="dark"] {
-    --form-bg: #1a2230;
-    --form-border: #3b4a60;
-    --input-bg: #0d131a;
-    --input-border: #4a5c78;
-    --input-text: #ffffff;
-    --label-text: #f1f5f9;
-    --placeholder-text: #94a3b8;
-    --focus-ring: rgba(56, 189, 248, 0.35);
-    --focus-border: #38bdf8;
-    --link-color: #38bdf8;
-    --counter-color: #94a3b8;
-}
+/* ==========================================
+   2. APPLY THEMES TO YOUR FORM ELEMENTS
+   ========================================== */
 
-/* ==========================================================================
-   2. THEME-AWARE DYNAMIC FORM STYLING
-   ========================================================================== */
+/* The main container box card */
 .form-theme-container {
-    background-color: var(--form-bg) !important;
+    background-color: var(--form-card-bg) !important;
+    border: 2px solid var(--form-outer-border) !important;
     padding: 30px;
     border-radius: 12px;
-    border: 2px solid var(--form-border) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease-in-out;
 }
 
+/* Titles and Labels (Name:, Email Address:, Your Message:) */
+.form-theme-container label {
+    display: block !important;
+    color: var(--form-label-text) !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+}
+
+/* Text Input and Textarea Boxes */
 .form-theme-container input[type="text"],
 .form-theme-container input[type="email"],
 .form-theme-container textarea {
-    background-color: var(--input-bg) !important;
-    color: var(--input-text) !important;
-    border: 2px solid var(--input-border) !important;
+    background-color: var(--input-field-bg) !important;
+    color: var(--input-field-text) !important;
+    border: 2px solid var(--input-field-border) !important;
     border-radius: 6px !important;
     padding: 12px 16px !important;
     font-size: 1rem !important;
@@ -74,46 +61,27 @@ document-root-dark, [data-theme="dark"] {
     transition: all 0.2s ease-in-out;
 }
 
+/* Placeholder strings (Type your name here...) */
 .form-theme-container input::placeholder,
 .form-theme-container textarea::placeholder {
-    color: var(--placeholder-text) !important;
-    opacity: 1 !important;
+    color: var(--form-desc-text) !important;
+    opacity: 0.7 !important;
 }
 
-/* Neon Focus Glow (Adapts automatically to the active theme context) */
-.form-theme-container input[type="text"]:focus,
-.form-theme-container input[type="email"]:focus,
-.form-theme-container textarea:focus {
-    outline: none !important;
-    border-color: var(--focus-border) !important;
-    box-shadow: 0 0 0 4px var(--focus-ring) !important;
+/* GDPR Disclaimer Checkbox Paragraph Labels */
+.form-theme-container label[for="terms-consent"],
+.form-theme-container label[for="privacy-consent"] {
+    color: var(--form-desc-text) !important;
+    font-weight: normal !important;
 }
 
-.form-theme-container label {
-    display: block !important;
-    color: var(--label-text) !important;
-    font-weight: 600 !important;
-    margin-bottom: 8px !important;
-}
-
+/* Hyperlinks (Terms of Use, Privacy Policy) */
 .form-theme-container label a {
-    color: var(--link-color) !important;
+    color: var(--link-text-color) !important;
     text-decoration: underline !important;
 }
 
+/* Character countdown tracker string */
 #charCount {
-    color: var(--counter-color) !important;
-}
-
-/* Simple Style for the Toggle Button Switch */
-.theme-toggle-btn {
-    background-color: var(--input-bg);
-    color: var(--input-text);
-    border: 2px solid var(--form-border);
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-bottom: 20px;
-    transition: all 0.2s ease;
+    color: var(--form-desc-text) !important;
 }
